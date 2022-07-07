@@ -217,6 +217,8 @@ FLA_Error FLA_LU_piv_copy_external_hip( rocblas_handle handle, FLA_Obj A, void* 
 FLA_Error FLA_Apply_pivots_unb_external_hip( rocblas_handle handle, FLA_Side side, FLA_Trans trans, FLA_Obj p, FLA_Obj A, void* A_hip );
 
 FLA_Error FLA_Trsm_piv_external_hip( rocblas_handle handle, FLA_Obj A, void* A_hip, FLA_Obj B, void* B_hip, FLA_Obj p );
+
+FLA_Error FLA_Apply_Q_blk_external_hip( rocblas_handle handle, FLA_Side side, FLA_Trans trans, FLA_Store storev, FLA_Obj A, void* A_hip, FLA_Obj t, void* t_hip, FLA_Obj B, void* B_hip );
 #endif
 
 // --- check routine prototypes ------------------------------------------------
