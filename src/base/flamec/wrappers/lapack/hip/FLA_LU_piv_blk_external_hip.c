@@ -13,13 +13,13 @@
 
 #ifdef FLA_ENABLE_HIP
 
+#include <flame/hiphopper.h>
 #include "hip/hip_runtime_api.h"
 #include "rocblas.h"
 #include "rocsolver.h"
 
 FLA_Error FLA_LU_piv_blk_external_hip( rocblas_handle handle, FLA_Obj A, void* A_hip, FLA_Obj p )
 {
-  FLA_Error    r_val = FLA_SUCCESS;
   FLA_Datatype datatype;
   dim_t        m_A, n_A, cs_A;
 
@@ -35,7 +35,7 @@ FLA_Error FLA_LU_piv_blk_external_hip( rocblas_handle handle, FLA_Obj A, void* A
   cs_A     = FLA_Obj_col_stride( A );
 
   rocblas_int* info;
-  hipMallocManaged( (void**) &info, sizeof( rocblas_int ), hipMemAttachGlobal );
+  hipMalloc( (void**) &info, sizeof( rocblas_int ) );
 
   void* A_mat;
   void* p_vec;
@@ -114,28 +114,18 @@ FLA_Error FLA_LU_piv_blk_external_hip( rocblas_handle handle, FLA_Obj A, void* A
 
   }
 
-  // synchronization here is needed b/c of using the pivot data
-  hipStream_t stream;
-  rocblas_get_stream( handle, &stream );
-  hipError_t err = hipStreamSynchronize( stream );
-  if ( err != hipSuccess )
+  hipError_t shift_err = shift_pivots_LAPACK_to_FLAME( handle, FLA_Obj_length( p ), p_vec );
+  if ( shift_err != hipSuccess )
   {
     fprintf( stderr,
-             "Failure to synchronize on HIP stream in LU. err=%d\n",
-             err );
+             "Failure to shift LU pivots to FLAME convention. err=%d\n",
+             shift_err );
     return FLA_FAILURE;
   }
 
-  // XXX HIP kernel
-  FLA_Shift_pivots_to( FLA_NATIVE_PIVOTS, p );
-
-  // Convert to zero-based indexing, if an index was reported.
-  if ( info > 0 ) r_val = *info - 1;
-  else            r_val = FLA_SUCCESS;
-
   hipFree( info );
 
-  return r_val;
+  return FLA_SUCCESS;
 }
 
 #endif
