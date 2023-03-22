@@ -43,21 +43,34 @@
   int          min_m_n    = min( *m, *n );                      \
   FLA_Error    e_val;                                           \
   FLA_Error    init_result;                                     \
+  dim_t        blocksize;                                       \
                                                                 \
   FLA_Init_safe( &init_result );                                \
                                                                 \
-  FLA_Obj_create_without_buffer( datatype, *m, *n, &A );        \
-  FLA_Obj_attach_buffer( buff_A, 1, *ldim_A, &A );              \
+  blocksize = min( FLASH_get_preferred_blocksize(), *ldim_A );  \
+  FLASH_Obj_create_without_buffer( datatype,                    \
+                                   *m,                          \
+                                   *n,                          \
+                                   FLASH_get_depth(),           \
+                                   &blocksize,                  \
+                                   &A );                        \
+  FLASH_Obj_attach_buffer( buff_A, 1, *ldim_A, &A );            \
                                                                 \
-  FLA_Obj_create_without_buffer( FLA_INT, min_m_n, 1, &p );     \
-  FLA_Obj_attach_buffer( buff_p, 1, min_m_n, &p );              \
-  FLA_Set( FLA_ZERO, p );                                       \
+  blocksize = min( FLASH_get_preferred_blocksize(), min_m_n );  \
+  FLASH_Obj_create_without_buffer( FLA_INT,                     \
+                                   min_m_n,                     \
+                                   1,                           \
+                                   FLASH_get_depth(),           \
+                                   &blocksize,                  \
+                                   &p );                        \
+  FLASH_Obj_attach_buffer( buff_p, 1, min_m_n, &p );            \
+  FLASH_Set( FLA_ZERO, p );                                     \
                                                                 \
-  e_val = FLA_LU_piv( A, p );                                   \
+  e_val = FLASH_LU_piv( A, p );                                 \
   FLA_Shift_pivots_to( FLA_LAPACK_PIVOTS, p );                  \
                                                                 \
-  FLA_Obj_free_without_buffer( &A );                            \
-  FLA_Obj_free_without_buffer( &p );                            \
+  FLASH_Obj_free_without_buffer( &A );                          \
+  FLASH_Obj_free_without_buffer( &p );                          \
                                                                 \
   FLA_Finalize_safe( init_result );                             \
                                                                 \
