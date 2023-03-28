@@ -784,6 +784,8 @@ FLA_Error FLASH_Obj_attach_buffer( void* buffer, dim_t rs, dim_t cs, FLA_Obj* H 
 	dim_t        m_base, n_base;
 	FLA_Datatype datatype;
 
+	if ( FLA_Check_error_level() >= FLA_MIN_ERROR_CHECKING )
+		FLASH_Obj_attach_buffer_check( buffer, rs, cs, H );
 
 	// Extract the scalar dimensions of the base object(s) and get its
 	// numerical datatype. (These fields will be set even if it has a NULL
@@ -791,12 +793,6 @@ FLA_Error FLASH_Obj_attach_buffer( void* buffer, dim_t rs, dim_t cs, FLA_Obj* H 
 	m_base   = FLASH_Obj_base_scalar_length( *H );
 	n_base   = FLASH_Obj_base_scalar_width( *H );
 	datatype = FLASH_Obj_datatype( *H );
-
-	// Adjust the strides, if necessary.
-	FLA_adjust_strides( m_base, n_base, &rs, &cs );
-
-	if ( FLA_Check_error_level() >= FLA_MIN_ERROR_CHECKING )
-		FLASH_Obj_attach_buffer_check( buffer, rs, cs, H );
 
 	// Create a temporary conventional object and attach the given buffer.
 	// Segments of this buffer will be partitioned out to the various

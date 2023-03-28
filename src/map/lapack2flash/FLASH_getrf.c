@@ -1,6 +1,7 @@
 /*
 
     Copyright (C) 2014, The University of Texas at Austin
+    Copyright (C) 2023, Advanced Micro Devices, Inc.
 
     This file is part of libflame and is available under the 3-Clause
     BSD license, which can be found in the LICENSE file at the top-level
@@ -36,41 +37,34 @@
                                int* buff_p,                             \
                                int* info )
 
-// Note that p should be set zero.
 #define LAPACK_getrf_body(prefix)                               \
   FLA_Datatype datatype = PREFIX2FLAME_DATATYPE(prefix);        \
-  FLA_Obj      A, p;                                            \
+  FLA_Obj      A, AH, pH, LH;                                   \
   int          min_m_n    = min( *m, *n );                      \
   FLA_Error    e_val;                                           \
   FLA_Error    init_result;                                     \
-  dim_t        blocksize;                                       \
+  dim_t        blocksize = FLASH_get_preferred_blocksize();     \
                                                                 \
   FLA_Init_safe( &init_result );                                \
                                                                 \
-  blocksize = min( FLASH_get_preferred_blocksize(), *ldim_A );  \
-  FLASH_Obj_create_without_buffer( datatype,                    \
-                                   *m,                          \
-                                   *n,                          \
-                                   FLASH_get_depth(),           \
-                                   &blocksize,                  \
-                                   &A );                        \
-  FLASH_Obj_attach_buffer( buff_A, 1, *ldim_A, &A );            \
+  FLA_Obj_create_without_buffer( datatype, *m, *n, &A );        \
+  FLA_Obj_attach_buffer( buff_A, 1, *ldim_A, &A );              \
                                                                 \
-  blocksize = min( FLASH_get_preferred_blocksize(), min_m_n );  \
-  FLASH_Obj_create_without_buffer( FLA_INT,                     \
-                                   min_m_n,                     \
-                                   1,                           \
-                                   FLASH_get_depth(),           \
-                                   &blocksize,                  \
-                                   &p );                        \
-  FLASH_Obj_attach_buffer( buff_p, 1, min_m_n, &p );            \
-  FLASH_Set( FLA_ZERO, p );                                     \
+  FLASH_LU_incpiv_create_hier_matrices( A,                      \
+                                        FLASH_get_depth(),      \
+                                        &blocksize,             \
+                                        0,                      \
+                                        &AH,                    \
+                                        &pH,                    \
+                                        &LH );                  \
                                                                 \
-  e_val = FLASH_LU_piv( A, p );                                 \
-  FLA_Shift_pivots_to( FLA_LAPACK_PIVOTS, p );                  \
+  e_val = FLASH_LU_incpiv( AH, pH, LH );                        \
+  FLA_Shift_pivots_to( FLA_LAPACK_PIVOTS, pH );                 \
                                                                 \
-  FLASH_Obj_free_without_buffer( &A );                          \
-  FLASH_Obj_free_without_buffer( &p );                          \
+  FLA_Obj_free_without_buffer( &A );                            \
+  FLASH_Obj_free( &AH );                                        \
+  FLASH_Obj_free( &pH );                                        \
+  FLASH_Obj_free( &LH );                                        \
                                                                 \
   FLA_Finalize_safe( init_result );                             \
                                                                 \
