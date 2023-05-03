@@ -21,43 +21,73 @@
 */
 
 // GEQRF and GEQR2
-#define LAPACK_geqrf(prefix)                                            \
-  int F77_ ## prefix ## geqrf(int* m,                                   \
-                              int* n,                                   \
+#define LAPACK_geqrf(prefix)                                                      \
+  int F77_ ## prefix ## geqrf(int* m,                                             \
+                              int* n,                                             \
                               PREFIX2LAPACK_TYPEDEF(prefix)* buff_A, int* ldim_A, \
-                              PREFIX2LAPACK_TYPEDEF(prefix)* buff_t,          \
-                              PREFIX2LAPACK_TYPEDEF(prefix)* buff_w, int* lwork, \
+                              PREFIX2LAPACK_TYPEDEF(prefix)* buff_t,              \
+                              PREFIX2LAPACK_TYPEDEF(prefix)* buff_w, int* lwork,  \
                               int* info )
 
 #define LAPACK_geqrf_body(prefix)                               \
   FLA_Datatype datatype = PREFIX2FLAME_DATATYPE(prefix);        \
-  FLA_Obj      A, t, T;                                         \
   int          min_m_n  = min( *m, *n );                        \
   FLA_Error    init_result;                                     \
+  dim_t        blocksize = FLASH_get_preferred_blocksize();     \
                                                                 \
-  FLA_Init_safe( &init_result );                                        \
-                                                                        \
-  FLA_Obj_create_without_buffer( datatype, *m, *n, &A );                \
-  FLA_Obj_attach_buffer( buff_A, 1, *ldim_A, &A );                      \
-                                                                        \
-  FLA_Obj_create_without_buffer( datatype, min_m_n, 1, &t );            \
-  FLA_Obj_attach_buffer( buff_t, 1, min_m_n, &t );                      \
-                                                                        \
-  FLA_Set( FLA_ZERO, t );                                               \
-                                                                        \
-  FLA_QR_UT_create_T( A, &T );                                          \
-  FLA_QR_UT( A, T );                                                    \
-  FLA_QR_UT_recover_tau( T, t );                                        \
-  PREFIX2FLAME_INVERT_TAU(prefix,t);                                    \
-                                                                        \
-  FLA_Obj_free_without_buffer( &A );                                    \
-  FLA_Obj_free_without_buffer( &t );                                    \
-  FLA_Obj_free( &T );                                                   \
-                                                                        \
-  FLA_Finalize_safe( init_result );                                     \
-                                                                        \
-  *info = 0;                                                            \
-                                                                        \
+  FLA_Init_safe( &init_result );                                \
+                                                                \
+  if( *m == *n ){                                               \
+    FLA_Obj A_flat, A, t, T;                                    \
+    FLA_Obj_create_without_buffer( datatype, *m, *n, &A_flat ); \
+    FLA_Obj_attach_buffer( buff_A, 1, *ldim_A, &A_flat );       \
+                                                                \
+    FLASH_Obj_create_without_buffer( datatype,                  \
+                                     min_m_n,                   \
+                                     1,                         \
+                                     FLASH_get_depth(),         \
+                                     &blocksize,                \
+                                     &t );                      \
+    FLASH_Obj_attach_buffer( buff_t, 1, min_m_n, &t );          \
+    FLASH_Set( FLA_ZERO, t );                                   \
+                                                                \
+    FLASH_QR_UT_create_hier_matrices( A_flat,                   \
+                                      FLASH_get_depth(),        \
+                                      &blocksize,               \
+                                      &A,                       \
+                                      &T );                     \
+    FLASH_QR_UT( A, T );                                        \
+    FLA_QR_UT_recover_tau( T, t );                              \
+    PREFIX2FLAME_INVERT_TAU(prefix,t);                          \
+                                                                \
+    FLA_Obj_free_without_buffer( &A_flat );                     \
+    FLASH_Obj_free_without_buffer( &t );                        \
+    FLASH_Obj_free( &A );                                       \
+    FLASH_Obj_free( &T );                                       \
+  }else{                                                        \
+    FLA_Obj A, t, T;                                            \
+    FLA_Obj_create_without_buffer( datatype, *m, *n, &A );      \
+    FLA_Obj_attach_buffer( buff_A, 1, *ldim_A, &A );            \
+                                                                \
+    FLA_Obj_create_without_buffer( datatype, min_m_n, 1, &t );  \
+    FLA_Obj_attach_buffer( buff_t, 1, min_m_n, &t );            \
+                                                                \
+    FLA_Set( FLA_ZERO, t );                                     \
+                                                                \
+    FLA_QR_UT_create_T( A, &T );                                \
+    FLA_QR_UT( A, T );                                          \
+    FLA_QR_UT_recover_tau( T, t );                              \
+    PREFIX2FLAME_INVERT_TAU(prefix,t);                          \
+                                                                \
+    FLA_Obj_free_without_buffer( &A );                          \
+    FLA_Obj_free_without_buffer( &t );                          \
+    FLA_Obj_free( &T );                                         \
+  }                                                             \
+                                                                \
+  FLA_Finalize_safe( init_result );                             \
+                                                                \
+  *info = 0;                                                    \
+                                                                \
   return 0;
 
 LAPACK_geqrf(s)
