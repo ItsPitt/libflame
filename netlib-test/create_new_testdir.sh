@@ -131,6 +131,9 @@ main()
 	sed -i 's/zchkaa.o: zchkaa.F/zchkaa.o: zchkaa.F $(LAPACKLIB) $(BLASLIB)/' ${testdir_new}/TESTING/LIN/Makefile
 	sed -i 's/$(FC) $(FFLAGS_DRV) -c -o $@ $</$(FC) $(FFLAGS_DRV) -c -o $@ $^/g' ${testdir_new}/TESTING/LIN/Makefile
 
+	# A small fix so this script will parse correctly
+	sed -i 's/find(\"run/find(\"run\)/g' ./${testdir_new}/lapack_testing.py
+
 	# Exit peacefully.
 	return 0
 }
