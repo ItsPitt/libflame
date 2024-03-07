@@ -703,7 +703,6 @@ INSTALL_PROGRAM
 PYTHON
 RANLIB
 AR
-FC_VENDOR
 fla_userdef_fflags
 ac_ct_FC
 FCFLAGS
@@ -3866,21 +3865,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 		as_fn_error 1 "Could not locate any of the following Fortran compilers: $FC $fla_requested_fc $fla_f_compiler_list. Cannot continue without a Fortran compiler." "$LINENO" 5
 	fi
 
-
-
-
-
-
-
-
-		FC_VENDOR=$(echo "$FC" | egrep -o 'gfortran|f77|g77|xlf|frt|pgf77|cf77|fort77|fl32|af77|xlf90|f90|pgf90|pghpf|epcf90|g95|xlf95|f95|fort|ifort|ifc|efc|pgfortran|pgf95|lf95|ftn|nagfor' | { read first rest ; echo $first ; })
-
-	if test "${FC_VENDOR}" = "" ; then
-		as_fn_error $? "configure can't determine the compiler vendor for $FC. Please submit a bug report to the FLAME developers." "$LINENO" 5
-	else
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: setting the FC_VENDOR environment variable to ${FC_VENDOR}." >&5
-$as_echo "$as_me: setting the FC_VENDOR environment variable to ${FC_VENDOR}." >&6;}
-	fi
 
 
 
