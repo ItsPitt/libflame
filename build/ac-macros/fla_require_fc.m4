@@ -3,7 +3,7 @@ AC_DEFUN([FLA_REQUIRE_FC],
 	AC_REQUIRE([FLA_OBSERVE_HOST_CPU_TYPE])
 
 	dnl Save the value of FCFLAGS. This will come in useful later in determining
-	dnl whether the user provided his own definition of FCFLAGS.
+	dnl whether the user provided their own definition of FCFLAGS.
 	fla_userdef_fcflags=$FCFLAGS
 	
 	dnl Find a Fortran compiler.
