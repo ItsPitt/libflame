@@ -583,7 +583,7 @@ ifeq ($$(ENABLE_VERBOSE),yes)
 	$(FC) -cpp -c $$< -o $$@
 else
 	@echo "Compiling $$<"
-	@$(FC) -cpp -c $$< -o $$@
+	@$(FC) $(FCFLAGS) -cpp -c $$< -o $$@
 endif
 ifeq ($$(FLA_ENABLE_MAX_ARG_LIST_HACK),yes)
 	@echo $$@ >> $$(AR_OBJ_LIST_FILE)
@@ -596,7 +596,7 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	$(FC) -cpp -c $< -o $@
 else
 	@echo "Building $<"
-	@$(FC) -cpp -c $< -o $@
+	@$(FC) $(FCFLAGS) -cpp -c $< -o $@
 endif
 ifeq ($(FLA_ENABLE_MAX_ARG_LIST_HACK),yes)
 	@echo $@ >> $(AR_OBJ_LIST_FILE)
@@ -607,7 +607,7 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	$(FC) -cpp -c $< -o $@
 else
 	@echo "Building $<"
-	@$(FC) -cpp -c $< -o $@
+	@$(FC) $(FCFLAGS) -cpp -c $< -o $@
 endif
 ifeq ($(FLA_ENABLE_MAX_ARG_LIST_HACK),yes)
 	@echo $@ >> $(AR_OBJ_LIST_FILE)

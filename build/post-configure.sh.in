@@ -116,7 +116,7 @@ echo ""
 echo "User-specified CFLAGS (prepended)............... : @fla_userdef_cflags@"
 
 echo ""
-echo "User-specified FFLAGS (prepended)............... : @fla_userdef_fflags@"
+echo "User-specified FCFLAGS (prepended)............... : @fla_userdef_fcflags@"
 
 echo ""
 echo "Enable internal error checking.................. : @fla_enable_internal_error_checking@"
