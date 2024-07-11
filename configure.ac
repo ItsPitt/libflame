@@ -260,6 +260,9 @@ FLA_CHECK_WITH_FC
 dnl Determine the Fortran compiler (FC).
 FLA_REQUIRE_FC
 
+dnl Determine the Fortran compiler vendor (FC_VENDOR).
+FLA_REQUIRE_FC_VENDOR
+
 dnl Check whether the user requested a specific library archiver. If so, assign
 dnl it to the requested archiver variable. Otherwise do nothing.
 FLA_CHECK_WITH_AR
